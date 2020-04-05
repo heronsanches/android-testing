@@ -27,6 +27,7 @@ import timber.log.Timber.DebugTree
  * Also, sets up Timber in the DEBUG BuildConfig. Read Timber's documentation for production setups.
  */
 class TodoApplication : Application() {
+    val tasksRepository by lazy { ServiceLocator.provideTasksRepository(this) }
 
     override fun onCreate() {
         super.onCreate()
