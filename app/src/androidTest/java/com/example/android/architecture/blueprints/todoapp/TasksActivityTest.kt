@@ -14,7 +14,9 @@ import androidx.test.filters.LargeTest
 import com.example.android.architecture.blueprints.todoapp.data.Task
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksRepository
 import com.example.android.architecture.blueprints.todoapp.tasks.TasksActivity
+import com.example.android.architecture.blueprints.todoapp.util.DataBindingIdlingResource
 import com.example.android.architecture.blueprints.todoapp.util.EspressoIdlingResource
+import com.example.android.architecture.blueprints.todoapp.util.monitorActivity
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.not
 import org.junit.After
@@ -25,22 +27,25 @@ import org.junit.runner.RunWith
 @LargeTest
 @RunWith(AndroidJUnit4::class)
 class TasksActivityTest {
-    /* OBS: any setup of the data state, such as adding tasks to the repository, must happen before
+    /* OBS: Any setup of the data state, such as adding tasks to the repository, must happen before
        ActivityScenario.launch() is called, so we do not use this rule into our test, instead we do
        it manually. */
 
     private lateinit var repository: TasksRepository
+    private val dataBindingIdlingResource = DataBindingIdlingResource()
 
     @Before
     fun setup() {
         repository =
                 ServiceLocator.provideTasksRepository(ApplicationProvider.getApplicationContext())
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
     }
 
     @After
     fun resetRepository() {
         IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
+        IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
         ServiceLocator.resetRepository()
     }
 
@@ -51,6 +56,7 @@ class TasksActivityTest {
 
         // Start up Tasks screen.
         val activityScenario = ActivityScenario.launch(TasksActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
 
         // Espresso code will go here.
         // Click on the task on the list and verify that all the data is correct.
