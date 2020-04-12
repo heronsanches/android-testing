@@ -9,6 +9,11 @@ import kotlinx.coroutines.runBlocking
 class FakeTestRepository : TasksRepository {
     var tasksServiceData: LinkedHashMap<String, Task> = LinkedHashMap()
     private val observableTasks = MutableLiveData<Result<List<Task>>>()
+    private var shouldReturnError = false
+
+    fun setReturnError(value: Boolean) {
+        shouldReturnError = value
+    }
 
     fun addTasks(vararg tasks: Task) {
         for (task in tasks) {
@@ -18,6 +23,9 @@ class FakeTestRepository : TasksRepository {
     }
 
     override suspend fun getTasks(forceUpdate: Boolean): Result<List<Task>> {
+        if (shouldReturnError) {
+            return Result.Error(Exception("Test exception"))
+        }
         return Result.Success(tasksServiceData.values.toList())
     }
 
@@ -31,46 +39,54 @@ class FakeTestRepository : TasksRepository {
     }
 
     override suspend fun refreshTask(taskId: String) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override fun observeTask(taskId: String): LiveData<Result<Task>> {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun getTask(taskId: String, forceUpdate: Boolean): Result<Task> {
-        TODO("Not yet implemented")
+        if (shouldReturnError) {
+            return Result.Error(Exception("Test exception"))
+        }
+        tasksServiceData[taskId]?.let {
+            return Result.Success(it)
+        }
+        return Result.Error(Exception("Could not find task"))
     }
 
     override suspend fun saveTask(task: Task) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun completeTask(task: Task) {
-        TODO("Not yet implemented")
+        val completedTask = task.copy(isCompleted = true)
+        tasksServiceData[task.id] = completedTask
+        refreshTasks()
     }
 
     override suspend fun completeTask(taskId: String) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun activateTask(task: Task) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun activateTask(taskId: String) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun clearCompletedTasks() {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun deleteAllTasks() {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override suspend fun deleteTask(taskId: String) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 }
