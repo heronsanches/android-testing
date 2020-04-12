@@ -79,4 +79,31 @@ class TasksActivityTest {
         // Make sure the activity is closed before resetting the db:
         activityScenario.close()
     }
+
+    @Test
+    fun createOneTask_deleteTask() {
+        // 1. Start TasksActivity.
+        val activityScenario = ActivityScenario.launch(TasksActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+
+        // 2. Add an active task by clicking on the FAB and saving a new task.
+        onView(withId(R.id.add_task_fab)).perform(click())
+        onView(withId(R.id.add_task_title_edit_text)).perform(replaceText("added title"))
+        onView(withId(R.id.add_task_description_edit_text)).perform(
+                replaceText("added description text")
+        )
+        onView(withId(R.id.save_task_fab)).perform(click())
+
+        // 3. Open the new task in a details view.
+        onView(withText("added title")).perform(click())
+
+        // 4. Click delete task in menu.
+        onView(withId(R.id.menu_delete)).perform(click())
+
+        // 5. Verify it was deleted.
+        onView(withText("added title")).check(doesNotExist())
+
+        // 6. Make sure the activity is closed.
+        activityScenario.close()
+    }
 }
